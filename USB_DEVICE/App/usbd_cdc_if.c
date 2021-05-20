@@ -95,7 +95,7 @@ uint8_t UserRxBufferFS[APP_RX_DATA_SIZE];
 uint8_t UserTxBufferFS[APP_TX_DATA_SIZE];
 
 /* USER CODE BEGIN PRIVATE_VARIABLES */
-
+uint8_t CommandWritePointer = 0;
 /* USER CODE END PRIVATE_VARIABLES */
 
 /**
@@ -111,6 +111,7 @@ extern USBD_HandleTypeDef hUsbDeviceFS;
 
 /* USER CODE BEGIN EXPORTED_VARIABLES */
 
+extern uint32_t Commands[32];
 /* USER CODE END EXPORTED_VARIABLES */
 
 /**
@@ -264,6 +265,12 @@ static int8_t CDC_Receive_FS(uint8_t* Buf, uint32_t *Len)
   /* USER CODE BEGIN 6 */
   USBD_CDC_SetRxBuffer(&hUsbDeviceFS, &Buf[0]);
   USBD_CDC_ReceivePacket(&hUsbDeviceFS);
+  for(int i = 0; i < ((*Len)-3); i+=4)
+  {
+    Commands[CommandWritePointer] = *((uint32_t *)&Buf[i]);
+    CommandWritePointer++;
+    CommandWritePointer %= 32;
+  }
   return (USBD_OK);
   /* USER CODE END 6 */
 }
