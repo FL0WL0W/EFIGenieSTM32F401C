@@ -25,6 +25,7 @@ extern "C"
   uint32_t prev;
   void Setup() 
   {
+    //ignore the warnings. these are here so we can check the alignment so we can put it in the editor
     volatile size_t uint8_align = alignof(uint8_t);
     volatile size_t uint16_align = alignof(uint16_t);
     volatile size_t uint32_align = alignof(uint32_t);
