@@ -615,5 +615,7 @@ defined(ADC4_IN15_PIN)
 				}
 			}
 		}
+
+		return -1000000;//return bogus value
 	}
 }

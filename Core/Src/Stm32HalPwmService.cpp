@@ -244,6 +244,9 @@ namespace Stm32
             return {14, TIM14, TIM_CHANNEL_4};
 #endif
 		}
+
+        //satisfy the compile warnings. should probably check this after calling the function to make sure we actually returned something
+        return 0;
 	}
 		
 	void Stm32HalPwmService::InitPin(uint16_t pin, PinDirection direction, uint16_t minFrequency)
