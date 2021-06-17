@@ -7,7 +7,7 @@ namespace Stm32
 {
 	void Stm32HalDigitalService::InitPin(uint16_t pin, PinDirection direction)
 	{		
-		if (pin == 0)
+		if (pin == 0xFFFF)
 			return;
 
 		EnableGPIOClock(pin);
@@ -22,7 +22,7 @@ namespace Stm32
 	
 	bool Stm32HalDigitalService::ReadPin(uint16_t pin)
 	{
-		if (pin == 0)
+		if (pin == 0xFFFF)
 			return false;
 		
 		return HAL_GPIO_ReadPin(PinToGPIO(pin), PinToGPIO_Pin(pin)) == GPIO_PIN_SET;
@@ -30,19 +30,25 @@ namespace Stm32
 	
 	void Stm32HalDigitalService::WritePin(uint16_t pin, bool value)
 	{
-		if (pin == 0)
+		if (pin == 0xFFFF)
 			return;
 		
   		HAL_GPIO_WritePin(PinToGPIO(pin), PinToGPIO_Pin(pin), value? GPIO_PIN_SET : GPIO_PIN_RESET);
 	}
 
-	void Stm32HalDigitalService::ScheduleRecurringInterrupt(uint16_t pin, ICallBack *callBack)
+	void Stm32HalDigitalService::AttachInterrupt(uint16_t pin, std::function<void()> callBack)
 	{
-		EnableInterrupt(pin, callBack, false);
+		if (pin == 0xFFFF)
+			return;
+		
+		attachInterrupt(pin, callBack);
 	}
 
-	void Stm32HalDigitalService::ScheduleNextInterrupt(uint16_t pin, ICallBack *callBack)
+	void Stm32HalDigitalService::DetachInterrupt(uint16_t pin)
 	{
-		EnableInterrupt(pin, callBack, true);
+		if (pin == 0xFFFF)
+			return;
+		
+		detachInterrupt(pin);
 	}
 }
