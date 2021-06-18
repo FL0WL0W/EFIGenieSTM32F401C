@@ -7,22 +7,7 @@
 
 namespace Stm32
 {
-    extern std::function<void()> ExternatlInterrupt0Callback;
-    extern std::function<void()> ExternatlInterrupt1Callback;
-    extern std::function<void()> ExternatlInterrupt2Callback;
-    extern std::function<void()> ExternatlInterrupt3Callback;
-    extern std::function<void()> ExternatlInterrupt4Callback;
-    extern std::function<void()> ExternatlInterrupt5Callback;
-    extern std::function<void()> ExternatlInterrupt6Callback;
-    extern std::function<void()> ExternatlInterrupt7Callback;
-    extern std::function<void()> ExternatlInterrupt8Callback;
-    extern std::function<void()> ExternatlInterrupt9Callback;
-    extern std::function<void()> ExternatlInterrupt10Callback;
-    extern std::function<void()> ExternatlInterrupt11Callback;
-    extern std::function<void()> ExternatlInterrupt12Callback;
-    extern std::function<void()> ExternatlInterrupt13Callback;
-    extern std::function<void()> ExternatlInterrupt14Callback;
-    extern std::function<void()> ExternatlInterrupt15Callback;
+    extern std::function<void()> ExternatlInterruptCallback[16];
 
     void EnableGPIOClock(uint16_t pin);
     void attachInterrupt(uint16_t pin, std::function<void()> callBack);
