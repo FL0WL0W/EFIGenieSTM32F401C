@@ -109,7 +109,7 @@ extern "C"
         }
       }
     }
-    const uint32_t now = _embeddedIOServiceCollection.TimerService->GetTick();
+    const tick_t now = _embeddedIOServiceCollection.TimerService->GetTick();
     loopTime->Set((float)(now-prev) / _embeddedIOServiceCollection.TimerService->GetTicksPerSecond());
     prev = now;
     _engineMain->Loop();

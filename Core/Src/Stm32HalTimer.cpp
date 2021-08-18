@@ -388,7 +388,7 @@ namespace Stm32
 		void TIM1_CC_IRQHandler(void)
 		{
 			if (_timCallBack[TimerIndex::Index1] != 0 && TIM1->SR & TIM_IT_CC1)
-				_timCallBack[TimerIndex::Index1]();;
+				_timCallBack[TimerIndex::Index1]();
 			if (TIM1->SR & TIM_IT_CC1)
 			{
 				_timPreviousCC[TimerIndex::Index1][0] = _timCurrentCC[TimerIndex::Index1][0];
