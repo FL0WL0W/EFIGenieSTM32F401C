@@ -42,37 +42,40 @@ namespace Stm32
 		_latency = 0;
 		_minTicks = 0;
 
-		//factor in latency
+		//Get Tick Compensation
 		volatile tick_t interruptTick;
 		volatile tick_t latencyTick;
 		interruptTick = this->GetTick();
 		latencyTick = this->GetTick();
 		const uint16_t getTickCompensation = latencyTick - interruptTick;
+
+		//setup interrupt
 		_interrupt = [this, &interruptTick]() { interruptTick = this->GetTick(); };
 
-		//get overall latency
-		interruptTick = 0;
-		latencyTick = GetTick() + 10000;
-		ScheduleCallBack(latencyTick);
-		while(interruptTick == 0) ;
-		_latency = interruptTick - latencyTick;
-
-		//remove overhead latency
-		interruptTick = 0;
-		latencyTick = GetTick() + 10000;
-		ScheduleCallBack(latencyTick);
-		while(interruptTick == 0) ;
-		_latency += interruptTick - latencyTick - getTickCompensation;
-				
 		//get minimum number of ticks to trigger an interrupt
-		interruptTick = 0;
 		while(true)
 		{
 			_minTicks++;
-			ScheduleCallBack(DWT->CYCCNT);
+			interruptTick = 0;
+			ScheduleCallBack(GetTick());
+			while(TickLessThanTick(GetTick(), _callTick)) ;
 			if(interruptTick != 0)
 				break;
 		}
+
+		//get minimum tick to add that schedules far enough in advance
+		interruptTick = 0;
+		latencyTick = GetTick();
+		ScheduleCallBack(latencyTick);
+		while(interruptTick == 0) ;
+		const uint16_t minTickAdd = interruptTick - latencyTick - getTickCompensation;
+
+		//get latency
+		interruptTick = 0;
+		latencyTick = GetTick() + minTickAdd;
+		ScheduleCallBack(latencyTick);
+		while(interruptTick == 0) ;
+		_latency = interruptTick - latencyTick - getTickCompensation;
 
 		//set return callback to interface
 		_interrupt = [this]() { this->ReturnCallBack(); };
@@ -91,10 +94,9 @@ namespace Stm32
 		_callTick = tick - _latency;
 		TIM->DIER |= TIM_IT_CC1;
 		const int ticks = _callTick - DWT->CYCCNT;
+		TIM->CCR1 = TIM->CNT + ticks;
 		if(ticks < static_cast<int>(_minTicks))
 			TIM->CCR1 = TIM->CNT + _minTicks;
-		else
-			TIM->CCR1 = TIM->CNT + ticks;
 		__enable_irq();
 	}
 	
