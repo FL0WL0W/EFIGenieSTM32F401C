@@ -76,7 +76,7 @@ extern "C"
   void Loop() 
   {
     if(!t.Scheduled)
-        _embeddedIOServiceCollection.TimerService->ScheduleTask(&t, t.Tick + _embeddedIOServiceCollection.TimerService->GetTicksPerSecond());
+        _embeddedIOServiceCollection.TimerService->ScheduleTask(&t, t.ScheduledTick + _embeddedIOServiceCollection.TimerService->GetTicksPerSecond());
 
     if(Commands[CommandReadPointer] != 0)
     {
