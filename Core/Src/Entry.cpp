@@ -6,7 +6,7 @@
 #include "Stm32HalPwmService.h"
 #include "EngineMain.h"
 #include "Variable.h"
-#include <functional>
+#include "CallBack.h"
 
 using namespace OperationArchitecture;
 using namespace EmbeddedIOServices;
@@ -51,7 +51,7 @@ extern "C"
     CDC_Transmit_FS((uint8_t*)responseText1, strlen(responseText1));
     _embeddedIOServiceCollection.DigitalService = new Stm32HalDigitalService();
     _embeddedIOServiceCollection.AnalogService = new Stm32HalAnalogService();
-    _embeddedIOServiceCollection.TimerService = new Stm32HalTimerService(TimerIndex::Index1);
+    _embeddedIOServiceCollection.TimerService = new Stm32HalTimerService(TimerIndex::Index2);
     _embeddedIOServiceCollection.PwmService = new Stm32HalPwmService();
     const char responseText2[33] = "EmbeddedIOServices Initialized\n\r";
     CDC_Transmit_FS((uint8_t*)responseText2, strlen(responseText2));
