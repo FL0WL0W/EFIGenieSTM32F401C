@@ -1,6 +1,40 @@
-import serial
+"""This module provides a simple serial console and HTTP request
+library for communicating with the EFIGenie.
+"""
+# import serial
 import struct
+import http.server
+import argparse
 
+
+class HTTPEFIGenieConsoleHandler(http.server.BaseHTTPRequestHandler):
+    """The EFI Genie Console HTTP Handler extension accepts a serial_handler
+    object that will be used during requests to communicate with the serial.
+
+    Args:
+        serial_conn: An instance of a connection to a serial or COM port.
+    """
+    def __init__(self, serial_conn):
+        self.serial_conn = serial_conn
+
+    def __call__(self, *args, **kwargs):
+        """ Handle a request """
+        super().__init__(*args, **kwargs)
+
+    def do_GET(self):
+        print(self.client_address)
+        print(self.path)
+        # sendBytes = struct.pack("<I", variableID)
+        # self.serial_connection.write(sendBytes)
+        # readType = self.serial_connection.read(1)
+        # if readType == 12 or readType == 14:
+        #     ser.write(struct.pack("<I", offset))
+        # readBytes = ser.read(8)
+        # self.close_connection = True
+        self.send_response(200)
+        self.end_headers()
+        self.wfile.write("Hello world".encode("utf8"))
+        # self.wfile.write(str(parse_readbytes(readBytes, readType))).encode('utf-8'))
 
 def parse_readbytes(readBytes, readType):
     """Parse the bytes read off the serial console.
@@ -40,9 +74,26 @@ def parse_readbytes(readBytes, readType):
     elif 12 <= readType <= 14:
         return " ".join(readBytes[0:8])
 
+def run_server(ser, interface, port):
+    """Run a simple HTTP server that relays request information to the serial
+    interface given by com_port and responds with the parsed info.
 
-def main():
-    ser = serial.Serial('/dev/ttyACM0', 9600, serial.EIGHTBITS, serial.PARITY_NONE, serial.STOPBITS_ONE, 1)
+    Args:
+        ser: COM or serial port connection.
+        interface: The network interface to start the HTTP server on.
+        port: The port to listen to on the HTTP server.
+    """
+    httpgeniehandler = HTTPEFIGenieConsoleHandler(ser)
+    httpgenie = http.server.HTTPServer((interface, port), httpgeniehandler)
+    httpgenie.serve_forever()
+
+def run_serial(ser):
+    """Open and run a simple REPL loop connected to the serial console.
+
+    Args:
+        ser: An open connection to a serial port.
+    """
+
     readBytes = bytearray([0, 0, 0, 0, 0, 0, 0, 0, 0])
 
     while True:
@@ -62,5 +113,32 @@ def main():
 
     ser.close()
 
+def main():
+    ap = argparse.ArgumentParser(
+        description="A simple serial console/http server for interfacing with the EFIGenie."
+    )
+    ap.add_argument(
+        "--server",
+        action="store_true",
+        help=(
+            "Run in server mode. Server mode starts an http server that accepts GET requests"
+            " which it will turn into serial commands and will respond with the serial outputs"
+            " parsed as strings. Currently it only listens on localhost port 8080."
+        )
+    )
+    ap.add_argument(
+        "--comport",
+        required=True,
+        help="The COM or serial port to connect to.",
+        default='/dev/ttyACM0'
+    )
+    args = ap.parse_args()
+    # serial_connection = serial.Serial(com_port, 9600, serial.EIGHTBITS, serial.PARITY_NONE, serial.STOPBITS_ONE, 1)
+    serial_connection = "serial"
+    if args.server:
+        run_server(serial_connection, "localhost", 8080)
+    else:
+        run_serial(serial_connection)
+    
 if __name__ == "__main__":
     main()
