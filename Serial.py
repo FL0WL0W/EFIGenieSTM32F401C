@@ -25,8 +25,8 @@ class HTTPEFIGenieConsoleHandler(http.server.BaseHTTPRequestHandler):
     def do_GET(self):
         urlp = urllib.parse.urlparse(self.path)
         query = urllib.parse.parse_qs(urlp.query)
-        varID = query["id"][0]
-        offset = query.get("offset", None)
+        varID = int(query["id"][0])
+        offset = int(query.get("offset", 0))
         sendBytes = struct.pack("<I", varID)
         self.serial_connection.write(sendBytes)
         # readType = self.serial_connection.read(1)
