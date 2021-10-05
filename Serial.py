@@ -1,10 +1,11 @@
 """This module provides a simple serial console and HTTP request
 library for communicating with the EFIGenie.
 """
-# import serial
+import serial
 import struct
 import http.server
 import argparse
+import urllib.parse
 
 
 class HTTPEFIGenieConsoleHandler(http.server.BaseHTTPRequestHandler):
@@ -22,19 +23,19 @@ class HTTPEFIGenieConsoleHandler(http.server.BaseHTTPRequestHandler):
         super().__init__(*args, **kwargs)
 
     def do_GET(self):
-        print(self.client_address)
-        print(self.path)
-        # sendBytes = struct.pack("<I", variableID)
-        # self.serial_connection.write(sendBytes)
+        urlp = urllib.parse.urlparse(self.path)
+        query = urllib.parse.parse_qs(urlp.query)
+        varID = query["id"][0]
+        offset = query.get("offset", None)
+        sendBytes = struct.pack("<I", varID)
+        self.serial_connection.write(sendBytes)
         # readType = self.serial_connection.read(1)
         # if readType == 12 or readType == 14:
-        #     ser.write(struct.pack("<I", offset))
-        # readBytes = ser.read(8)
-        # self.close_connection = True
+            # ser.write(struct.pack("<I", offset))
+        readBytes = ser.read(8)
         self.send_response(200)
         self.end_headers()
-        self.wfile.write("Hello world".encode("utf8"))
-        # self.wfile.write(str(parse_readbytes(readBytes, readType))).encode('utf-8'))
+        self.wfile.write(str(parse_readbytes(readBytes, readType)).encode('utf-8'))
 
 def parse_readbytes(readBytes, readType):
     """Parse the bytes read off the serial console.
