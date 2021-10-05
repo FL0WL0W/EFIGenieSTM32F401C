@@ -18,6 +18,7 @@ extern char _config;
 
 extern "C"
 {
+  uint8_t VariableBuff[9];
   uint32_t Commands[32];
   uint8_t CommandReadPointer = 0;
   bool secondCommand = false;
@@ -103,7 +104,9 @@ extern "C"
         }
         else
         {
-          CDC_Transmit_FS((uint8_t*)it->second, sizeof(Variable));
+          VariableBuff[0] = it->second->Type;
+          std::memcpy(&VariableBuff[1], (uint8_t*)&it->second->Value, sizeof(uint64_t));
+          CDC_Transmit_FS(VariableBuff, sizeof(uint64_t) + sizeof(VariableType));
           Commands[CommandReadPointer] = 0;
           CommandReadPointer++;
           CommandReadPointer %= 32;
