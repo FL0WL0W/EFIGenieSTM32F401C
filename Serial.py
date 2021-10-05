@@ -1,85 +1,66 @@
 import serial
 import struct
-ser = serial.Serial('/dev/ttyACM0', 9600, serial.EIGHTBITS, serial.PARITY_NONE, serial.STOPBITS_ONE, 1)
 
-readBytes = bytearray([0, 0, 0, 0, 0, 0, 0, 0, 0])
 
-def zero():
-    return "void"
+def parse_readbytes(readBytes, readType):
+    """Parse the bytes read off the serial console.
 
-def one():
-    return struct.unpack('B', readBytes[0])[0]
- 
-def two():
-    return struct.unpack('H', readBytes[0:1])[0]
- 
-def three():
-    return struct.unpack('I', readBytes[0:4])[0]
- 
-def four():
-    return struct.unpack('L', readBytes)[0]
- 
-def five():
-    return struct.unpack('b', readBytes[0])[0]
- 
-def six():
-    return struct.unpack('h', readBytes[0:1])[0]
- 
-def seven():
-    return struct.unpack('i', readBytes[0:4])[0]
- 
-def eight():
-    return struct.unpack('l', readBytes)[0]
- 
-def nine():
-    return struct.unpack('f', readBytes[0:4])[0]
- 
-def ten():
-    return struct.unpack('d', readBytes)[0]
- 
-def eleven():
-    if readBytes[0] != 0 :
-        return "True"
-    return "False"
-  
-def thirteen():
-    return hex(readBytes[0]) + " " + hex(readBytes[1]) + " " + hex(readBytes[2]) + " " + hex(readBytes[3]) + " " + hex(readBytes[4]) + " " + hex(readBytes[5]) + " " + hex(readBytes[6]) + " " + hex(readBytes[7])
- 
-def twelvefourteen():
-    offset = int(input("Enter Offset: "))
-    sendBytes = bytearray([offset, 0, 0, 0])
-    ser.write(sendBytes)
-    return hex(readBytes[0]) + " " + hex(readBytes[1]) + " " + hex(readBytes[2]) + " " + hex(readBytes[3]) + " " + hex(readBytes[4]) + " " + hex(readBytes[5]) + " " + hex(readBytes[6]) + " " + hex(readBytes[7])
+    Args:
+        readBytes: The bytes data read off the console. Will always be 8 bytes long
+            but sometimes only a portion of the bytes are valid depending on the readType.
+        readType: Type of info the readBytes should be interpreted as. Mostly designates
+            which struct the data should be unpacked into, but a couple of edge cases exist.
 
-while True:
-    variableID = int(input("Enter id of variable to check: "))
+    Returns:
+        readBytes parsed into a string or possibly a bool. 
+    """
+    # For the simple cases lets make a dictionary of the read type
+    # key mapping to a tuple containing the struct format and the slice
+    # of byte data that should be unpacked.
+    fmtslc_switch = {
+        1: ("B", slice(0, 1)),
+        2: ("H", slice(0, 2)),
+        3: ("I", slice(0, 4)),
+        4: ("L", slice(0, 8)),
+        5: ("b", slice(0, 1)),
+        6: ("h", slice(0, 2)),
+        7: ("i", slice(0, 4)),
+        8: ("l", slice(0, 8)),
+        9: ("f", slice(0, 4)),
+        10: ("d", slice(0, 8)),
+    }
+    # For all cases we'll just use a simple if/else construct to parse
+    if readType == 0:
+        return "VOID"
+    elif 1 <= readType <= 10:
+        fmt, slc = switcher[readType][:]
+        return struct.unpack(fmt, readBytes[slc])
+    elif readType == 11:
+        return bool(readBytes[0])
+    elif 12 <= readType <= 14:
+        return " ".join(readBytes[0:8])
 
-    sendBytes = bytearray([variableID, 0, 0, 0])
-    ser.write(sendBytes)
-    readBytes = ser.read(8)
-    readType = ser.read(1)
-    ser.read(7)
-    if len(readType) > 0:
-        switcher = {
-            0: zero,
-            1: one,
-            2: two,
-            3: three,
-            4: four,
-            5: five,
-            6: six,
-            7: seven,
-            8: eight,
-            9: nine,
-            10: ten,
-            11: eleven,
-            12: twelvefourteen,
-            13: thirteen,
-            14: twelvefourteen
-        }
-        # Get the function from switcher dictionary
-        func = switcher.get(readType[0], lambda: "Invalid Type")
-        # Execute the function
-        print(func())
 
-ser.close()
+def main():
+    ser = serial.Serial('/dev/ttyACM0', 9600, serial.EIGHTBITS, serial.PARITY_NONE, serial.STOPBITS_ONE, 1)
+    readBytes = bytearray([0, 0, 0, 0, 0, 0, 0, 0, 0])
+
+    while True:
+        variableID = input("Enter ID of variable to check (q to quit): ")
+        if variableID.lower() == "q":
+            break
+        else:
+            variableID = int(variableID)
+        sendBytes = struct.pack("<I", variableID)
+        ser.write(sendBytes)
+        readType = ser.read(1)
+        if readType == 12 or readType == 14:
+            offset = int(input("Enter Offset: "))
+            ser.write(struct.pack("<I", offset))
+        readBytes = ser.read(8)
+        print(parse_readbytes(readBytes, readType))
+
+    ser.close()
+
+if __name__ == "__main__":
+    main()
