@@ -26,13 +26,6 @@ extern "C"
   EngineMain *_engineMain;
   Variable *loopTime;
   uint32_t prev;
-  
-  bool val = true;
-  void test() {
-      _embeddedIOServiceCollection.DigitalService->WritePin(45, val);
-      val = !val;
-  }
-  Task t = Task(&test);
 
   void Setup() 
   {
@@ -58,9 +51,6 @@ extern "C"
     const char responseText2[33] = "EmbeddedIOServices Initialized\n\r";
     CDC_Transmit_FS((uint8_t*)responseText2, strlen(responseText2));
 
-    _embeddedIOServiceCollection.DigitalService->InitPin(45, Out);
-    _embeddedIOServiceCollection.TimerService->ScheduleTask(&t, _embeddedIOServiceCollection.TimerService->GetTick() + _embeddedIOServiceCollection.TimerService->GetTicksPerSecond());
-
     const char responseText3[26] = "Initializing EngineMain\n\r";
     CDC_Transmit_FS((uint8_t*)responseText3, strlen(responseText3));
 		unsigned int _configSize = 0;
@@ -77,9 +67,6 @@ extern "C"
   }
   void Loop() 
   {
-    if(!t.Scheduled)
-        _embeddedIOServiceCollection.TimerService->ScheduleTask(&t, t.ScheduledTick + _embeddedIOServiceCollection.TimerService->GetTicksPerSecond());
-
     if(Commands[CommandReadPointer] != 0)
     {
       std::map<uint32_t, Variable*>::iterator it = _engineMain->SystemBus->Variables.find(Commands[CommandReadPointer]);
