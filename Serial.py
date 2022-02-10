@@ -27,7 +27,7 @@ class HTTPEFIGenieConsoleHandler(http.server.BaseHTTPRequestHandler):
         query = urllib.parse.parse_qs(urlp.query)
         varID = int(query["id"][0])
         offset = int(query.get("offset", 0))
-        sendBytes = struct.pack("<I", varID)
+        sendBytes = struct.pack("<IB", varID, offset)
         self.serial_connection.write(sendBytes)
         # readType = self.serial_connection.read(1)
         # if readType == 12 or readType == 14:
@@ -68,7 +68,7 @@ def parse_readbytes(readBytes, readType):
     if readType == 0:
         return "VOID"
     elif 1 <= readType <= 10:
-        fmt, slc = switcher[readType][:]
+        fmt, slc = fmtslc_switch[readType][:]
         return struct.unpack(fmt, readBytes[slc])
     elif readType == 11:
         return bool(readBytes[0])
@@ -103,14 +103,18 @@ def run_serial(ser):
             break
         else:
             variableID = int(variableID)
-        sendBytes = struct.pack("<I", variableID)
+        sendBytes = struct.pack("<IB", variableID, 0)
         ser.write(sendBytes)
         readType = ser.read(1)
-        if readType == 12 or readType == 14:
-            offset = int(input("Enter Offset: "))
-            ser.write(struct.pack("<I", offset))
         readBytes = ser.read(8)
-        print(parse_readbytes(readBytes, readType))
+        if len(readType) == 0:
+            continue 
+        if readType[0] == 12 or readType[0] == 14:
+            offset = int(input("Enter Offset: "))
+            ser.write(struct.pack("<IB", variableID, offset))
+            readType = ser.read(1)
+            readBytes = ser.read(8)
+        print(parse_readbytes(readBytes, readType[0]))
 
     ser.close()
 
@@ -134,8 +138,8 @@ def main():
         default='/dev/ttyACM0'
     )
     args = ap.parse_args()
-    # serial_connection = serial.Serial(com_port, 9600, serial.EIGHTBITS, serial.PARITY_NONE, serial.STOPBITS_ONE, 1)
-    serial_connection = "serial"
+    serial_connection = serial.Serial("/dev/ttyACM0", 9600, serial.EIGHTBITS, serial.PARITY_NONE, serial.STOPBITS_ONE, 1)
+    # serial_connection = "serial"
     if args.server:
         run_server(serial_connection, "localhost", 8080)
     else:
