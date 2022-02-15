@@ -69,7 +69,7 @@ extern "C"
     _cdcService->Send((uint8_t*)responseText4, strlen(responseText4));
     _cdcService->Flush();
 
-    _getVariableHandler = new CommunicationHandler_GetVariable(_cdcService, &_engineMain->SystemBus->Variables);
+    _getVariableHandler = new CommunicationHandler_GetVariable(_cdcService, _engineMain->VariableMap);
 
     const char responseText5[24] = "Setting Up EngineMain\n\r";
     _cdcService->Send((uint8_t*)responseText5, strlen(responseText5));
@@ -78,7 +78,7 @@ extern "C"
     const char responseText6[19] = "EngineMain Setup\n\r";
     _cdcService->Send((uint8_t*)responseText6, strlen(responseText6));
     _cdcService->Flush();
-    loopTime = _engineMain->SystemBus->GetOrCreateVariable(250);
+    loopTime = _engineMain->VariableMap->GenerateValue(250);
   }
   void Loop() 
   {
