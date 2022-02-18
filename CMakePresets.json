@@ -1,0 +1,51 @@
+{
+    "version": 2,
+    "configurePresets": [
+        {
+            "name": "STM32F401CCUx-Debug",
+            "displayName": "STM32F401CCUx-Debug",
+            "description": "STM32F401CCUx-Debug",
+            "generator": "Ninja",
+            "binaryDir": "${sourceDir}/build/STM32F401CCUx-Debug",
+            "cacheVariables": {
+                "CMAKE_C_COMPILER": "arm-none-eabi-gcc",
+                "CMAKE_CXX_COMPILER": "arm-none-eabi-g++",
+                "CMAKE_SYSTEM_NAME": "Generic",
+                "CMAKE_SYSTEM_PROCESSOR": "arm",
+                "CMAKE_OBJCOPY": "arm-none-eabi-objcopy",
+                "CMAKE_C_FLAGS": "-DUSE_HAL_DRIVER -DSTM32F401xC -DDEBUG -g -gdwarf-2 -mcpu=cortex-m4 -mthumb -mfpu=fpv4-sp-d16 -mfloat-abi=hard -Wall -fdata-sections -ffunction-sections -mno-unaligned-access",
+                "CMAKE_CXX_FLAGS": "-DUSE_HAL_DRIVER -DSTM32F401xC -DDEBUG -g -gdwarf-2 -mcpu=cortex-m4 -mthumb -mfpu=fpv4-sp-d16 -mfloat-abi=hard -Wall -fdata-sections -ffunction-sections -mno-unaligned-access -fno-exceptions -fno-rtti",
+                "CMAKE_ASM_FLAGS": "-DUSE_HAL_DRIVER -DSTM32F401xC -DDEBUG -g -gdwarf-2 -mcpu=cortex-m4 -mthumb -mfpu=fpv4-sp-d16 -mfloat-abi=hard -Wall -fdata-sections -ffunction-sections -mno-unaligned-access -x assembler-with-cpp",
+                "CMAKE_EXE_LINKER_FLAGS": "-mcpu=cortex-m4 -mthumb -DDEBUG -mfpu=fpv4-sp-d16 -mfloat-abi=hard --specs=nano.specs --specs=nosys.specs -lc -lm -lnosys -T\"${sourceDir}/STM32F401CCUx_FLASH.ld\" -Wl,--cref -Wl,--gc-sections"
+            }
+        },
+        {
+            "name": "STM32F401CCUx-Release",
+            "displayName": "STM32F401CCUx-Release",
+            "description": "STM32F401CCUx-Release",
+            "generator": "Ninja",
+            "binaryDir": "${sourceDir}/build/STM32F401CCUx-Release",
+            "cacheVariables": {
+                "CMAKE_C_COMPILER": "arm-none-eabi-gcc",
+                "CMAKE_CXX_COMPILER": "arm-none-eabi-g++",
+                "CMAKE_SYSTEM_NAME": "Generic",
+                "CMAKE_SYSTEM_PROCESSOR": "arm",
+                "CMAKE_OBJCOPY": "arm-none-eabi-objcopy",
+                "CMAKE_C_FLAGS": "-DUSE_HAL_DRIVER -DSTM32F401xC -DNDEBUG -O3 -mcpu=cortex-m4 -mthumb -mfpu=fpv4-sp-d16 -mfloat-abi=hard -Wall -fdata-sections -ffunction-sections -mno-unaligned-access",
+                "CMAKE_CXX_FLAGS": "-DUSE_HAL_DRIVER -DSTM32F401xC -DNDEBUG -O3 -mcpu=cortex-m4 -mthumb -mfpu=fpv4-sp-d16 -mfloat-abi=hard -Wall -fdata-sections -ffunction-sections -mno-unaligned-access -fno-exceptions -fno-rtti",
+                "CMAKE_ASM_FLAGS": "-DUSE_HAL_DRIVER -DSTM32F401xC -DNDEBUG -O3 -mcpu=cortex-m4 -mthumb -mfpu=fpv4-sp-d16 -mfloat-abi=hard -Wall -fdata-sections -ffunction-sections -mno-unaligned-access -x assembler-with-cpp",
+                "CMAKE_EXE_LINKER_FLAGS": "-mcpu=cortex-m4 -mthumb -DNDEBUG -O3 -mfpu=fpv4-sp-d16 -mfloat-abi=hard --specs=nano.specs --specs=nosys.specs -lc -lm -lnosys -T\"${sourceDir}/STM32F401CCUx_FLASH.ld\" -Wl,--cref -Wl,--gc-sections"
+            }
+        }
+    ],
+    "buildPresets": [
+        {
+            "name": "STM32F401CCUx-Debug",
+            "configurePreset": "STM32F401CCUx-Debug"
+        },
+        {
+            "name": "STM32F401CCUx-Release",
+            "configurePreset": "STM32F401CCUx-Release"
+        }
+    ]
+}
