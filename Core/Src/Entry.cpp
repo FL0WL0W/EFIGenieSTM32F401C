@@ -7,6 +7,7 @@
 #include "EFIGenieMain.h"
 #include "Variable.h"
 #include "CallBack.h"
+#include "Config.h"
 #include "STM32HalCommunicationService_CDC.h"
 #include "CommunicationHandlers/CommunicationHandler_GetVariable.h"
 
@@ -69,7 +70,8 @@ extern "C"
     _cdcService->Send((uint8_t*)responseText4, strlen(responseText4));
     _cdcService->Flush();
 
-    _getVariableHandler = new CommunicationHandler_GetVariable(_cdcService, _engineMain->VariableMap);
+    const void *metadata = Config::OffsetConfig(&_config, _configSize);
+    _getVariableHandler = new CommunicationHandler_GetVariable(_cdcService, _engineMain->VariableMap, metadata);
 
     const char responseText5[24] = "Setting Up EngineMain\n\r";
     _cdcService->Send((uint8_t*)responseText5, strlen(responseText5));
