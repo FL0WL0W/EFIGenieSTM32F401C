@@ -71,7 +71,8 @@ extern "C"
     _cdcService->Flush();
 
     const void *metadata = Config::OffsetConfig(&_config, _configSize);
-    _getVariableHandler = new CommunicationHandler_GetVariable(_cdcService, _engineMain->VariableMap, metadata);
+    _getVariableHandler = new CommunicationHandler_GetVariable(_engineMain->VariableMap, metadata);
+    _cdcService->RegisterHandler(_getVariableHandler);
 
     const char responseText5[24] = "Setting Up EngineMain\n\r";
     _cdcService->Send((uint8_t*)responseText5, strlen(responseText5));
