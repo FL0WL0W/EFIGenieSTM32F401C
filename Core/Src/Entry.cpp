@@ -32,6 +32,7 @@ extern "C"
   EFIGenieMain *_engineMain;
   Variable *loopTime;
   uint32_t prev;
+  GeneratorMap<Variable> _variableMap;
 
   void Setup() 
   {
@@ -65,13 +66,13 @@ extern "C"
     _cdcService->Send((uint8_t*)responseText3, strlen(responseText3));
     _cdcService->Flush();
 		size_t _configSize = 0;
-    _engineMain = new EFIGenieMain(reinterpret_cast<void*>(&_config), _configSize, &_embeddedIOServiceCollection);
+    _engineMain = new EFIGenieMain(reinterpret_cast<void*>(&_config), _configSize, &_embeddedIOServiceCollection, &_variableMap);
     const char responseText4[25] = "EngineMain Initialized\n\r";
     _cdcService->Send((uint8_t*)responseText4, strlen(responseText4));
     _cdcService->Flush();
 
     const void *metadata = Config::OffsetConfig(&_config, _configSize);
-    _getVariableHandler = new CommunicationHandler_GetVariable(_engineMain->VariableMap, metadata);
+    _getVariableHandler = new CommunicationHandler_GetVariable(&_variableMap);
     _cdcService->RegisterHandler(_getVariableHandler);
 
     const char responseText5[24] = "Setting Up EngineMain\n\r";
@@ -81,7 +82,7 @@ extern "C"
     const char responseText6[19] = "EngineMain Setup\n\r";
     _cdcService->Send((uint8_t*)responseText6, strlen(responseText6));
     _cdcService->Flush();
-    loopTime = _engineMain->VariableMap->GenerateValue(250);
+    loopTime = _variableMap.GenerateValue(250);
   }
   void Loop() 
   {
