@@ -28,7 +28,11 @@ Download Ninja from the releases <a href="https://github.com/ninja-build/ninja/r
 OpenOCD is used in conjunction with an ST-Link V2 adapter. OpenOCD binaries can be found <a href="https://openocd.org/pages/getting-openocd.html">here</a>.
 ### Windows
 1. Extract the zip file to a directory on your machine. In my case C:\OpenOCD
-2. Add the bin folder to your environment path. To do this, type "Environment Variable" into the start menu and select "Edit the system environment variables" ![image](https://user-images.githubusercontent.com/1595263/178067947-d407263f-26bd-4a2c-a7dd-f2b12f015fdd.png)
-3. Click the button "Environment Variables..." ![image](https://user-images.githubusercontent.com/1595263/178068056-b4ab842b-89ca-4845-9d64-a80192caaa93.png)
-4. Select the Path variable and click "Edit" ![image](https://user-images.githubusercontent.com/1595263/178068336-3e503a8e-2917-4659-aa43-eae185bc596f.png)
-5. Select "New" and enter the location of the OpenOCD bin. In this case C:\OpenOCD\bin ![image](https://user-images.githubusercontent.com/1595263/178068539-0fa86af0-9468-4c9e-af4e-9b083819332f.png)
+2. Add the bin folder to your environment path. To do this, type "Environment Variable" into the start menu and select "Edit the system environment variables" 
+![image](https://user-images.githubusercontent.com/1595263/178067947-d407263f-26bd-4a2c-a7dd-f2b12f015fdd.png)
+3. Click the button "Environment Variables..." 
+![image](https://user-images.githubusercontent.com/1595263/178068056-b4ab842b-89ca-4845-9d64-a80192caaa93.png)
+4. Select the Path variable and click "Edit" 
+![image](https://user-images.githubusercontent.com/1595263/178068336-3e503a8e-2917-4659-aa43-eae185bc596f.png)
+5. Select "New" and enter the location of the OpenOCD bin. In this case C:\OpenOCD\bin 
+![image](https://user-images.githubusercontent.com/1595263/178068539-0fa86af0-9468-4c9e-af4e-9b083819332f.png)
