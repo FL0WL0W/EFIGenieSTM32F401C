@@ -19,7 +19,7 @@ M1 Mac does not work with the lates arm toolchain so you will need to download 1
 ***TODO, setup probably similar to Linux
 
 ## CMake
-Download and install CMake from <a href="https://cmake.org/download/">here</a>.
+Download and install CMake from <a href="https://cmake.org/download/">here</a>. Additional information for installation of CMake can be found <a href="https://cmake.org/install/">here</a>. You will need to install for command line use.
 
 ## CMake Generator
 Download Ninja from the releases <a href="https://github.com/ninja-build/ninja/releases">here</a>.
