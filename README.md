@@ -5,6 +5,7 @@ VSCode is the IDE used for developing EFIGenie as well as the STM32 branches. Th
 In addition to VSCode, you will also need the ARM Embedded Toolchain and a cmake generator to compile the project. The CMake generator typically used is ninja
 ## VSCode
 Download VSCode from <a href="https://code.visualstudio.com/download">here</a>. The installation is straight forward and additional information for setting up VSCode can be found <a href="https://code.visualstudio.com/docs/setup/setup-overview">here</a>.
+
 ## ARM Embedded Toolchain
 Download the toolchain from <a href="https://developer.arm.com/downloads/-/gnu-rm">here</a>. Choose the correct download for your operating system. 
 ### Windows
@@ -15,6 +16,10 @@ Download the toolchain from <a href="https://developer.arm.com/downloads/-/gnu-r
 ***need to update***
 ### Mac
 ***TODO, setup probably similar to Linux
+
+## CMake
+Download and install CMake from <a href="https://cmake.org/download/">here</a>.
+
 ## CMake Generator
 Download Ninja from the releases <a href="https://github.com/ninja-build/ninja/releases">here</a>.
 ### Windows
