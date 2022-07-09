@@ -15,6 +15,7 @@ Download the toolchain from <a href="https://developer.arm.com/downloads/-/gnu-r
 ### Linux
 ***need to update***
 ### Mac
+M1 Mac does not work with the lates arm toolchain so you will need to download 10.3-2021.07 instead of 10.3-2021.10
 ***TODO, setup probably similar to Linux
 
 ## CMake
