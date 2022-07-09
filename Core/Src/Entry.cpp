@@ -58,25 +58,13 @@ extern "C"
     _cdcService = new STM32HalCommunicationService_CDC();
     _cdcService->RegisterHandler(_prefixHandler = new CommunicationHandler_Prefix());
 
-    const char responseText1[34] = "Initializing EmbeddedIOServices\n\r";
-    _cdcService->Send((uint8_t*)responseText1, strlen(responseText1));
-    _cdcService->Flush();
     _embeddedIOServiceCollection.DigitalService = new Stm32HalDigitalService();
     _embeddedIOServiceCollection.AnalogService = new Stm32HalAnalogService();
     _embeddedIOServiceCollection.TimerService = new Stm32HalTimerService(TimerIndex::Index2);
     _embeddedIOServiceCollection.PwmService = new Stm32HalPwmService();
-    const char responseText2[33] = "EmbeddedIOServices Initialized\n\r";
-    _cdcService->Send((uint8_t*)responseText2, strlen(responseText2));
-    _cdcService->Flush();
 
-    const char responseText3[26] = "Initializing EngineMain\n\r";
-    _cdcService->Send((uint8_t*)responseText3, strlen(responseText3));
-    _cdcService->Flush();
 		size_t _configSize = 0;
     _engineMain = new EFIGenieMain(reinterpret_cast<void*>(&_config), _configSize, &_embeddedIOServiceCollection, _variableMap);
-    const char responseText4[25] = "EngineMain Initialized\n\r";
-    _cdcService->Send((uint8_t*)responseText4, strlen(responseText4));
-    _cdcService->Flush();
 
     _metadata = Config::OffsetConfig(&_config, _configSize);
     _getVariableHandler = new CommunicationHandler_GetVariable(_variableMap);
@@ -112,6 +100,7 @@ extern "C"
       }
       else if(reinterpret_cast<size_t>(writeDataDest) >= 0x8004000 && reinterpret_cast<size_t>(writeDataDest) <= 0x8008000)
       {
+        HAL_FLASH_Unlock();
         FLASH_OBProgramInitTypeDef pOBInit;
         pOBInit.OptionType = OPTIONBYTE_WRP;
         pOBInit.WRPState = OB_WRPSTATE_DISABLE;
@@ -119,12 +108,23 @@ extern "C"
         pOBInit.Banks = FLASH_BANK_1;
         HAL_FLASHEx_OBProgram(&pOBInit);
         if(reinterpret_cast<size_t>(writeDataDest) == 0x8004000)
-          FLASH_Erase_Sector(FLASH_SECTOR_1, VOLTAGE_RANGE_4);
-
-        for(size_t i = 0; i < (writeDataLength + sizeof(uint64_t) - 1) / sizeof(uint64_t); i++)
         {
-          uint32_t programType = FLASH_TYPEPROGRAM_DOUBLEWORD;
-          HAL_FLASH_Program(programType, reinterpret_cast<size_t>(writeDataDest), reinterpret_cast<uint64_t *>(writeData)[i]);
+          FLASH_EraseInitTypeDef pEraseInit;
+          pEraseInit.TypeErase = FLASH_TYPEERASE_SECTORS;
+          pEraseInit.NbSectors = 1;
+          pEraseInit.Sector = 1;
+          pEraseInit.VoltageRange = VOLTAGE_RANGE_3;
+
+          uint32_t SectorError;
+          HAL_FLASHEx_Erase(&pEraseInit, &SectorError);
+        }
+
+        for(size_t i = 0; i < writeDataLength; i++)
+        {
+          uint32_t programType = FLASH_TYPEPROGRAM_BYTE;
+          uint8_t data = 0;
+          std::memcpy(&data,  reinterpret_cast<void *>(reinterpret_cast<uint8_t *>(writeData) + i), sizeof(uint8_t));
+          HAL_FLASH_Program(programType, reinterpret_cast<size_t>(writeDataDest) + i, data);
         }
         pOBInit.WRPState = OB_WRPSTATE_ENABLE;
         HAL_FLASHEx_OBProgram(&pOBInit);
@@ -193,13 +193,7 @@ extern "C"
       return static_cast<size_t>(0);
     }), "c", 1, false);
 
-    const char responseText5[24] = "Setting Up EngineMain\n\r";
-    _cdcService->Send((uint8_t*)responseText5, strlen(responseText5));
-    _cdcService->Flush();
     _engineMain->Setup();
-    const char responseText6[19] = "EngineMain Setup\n\r";
-    _cdcService->Send((uint8_t*)responseText6, strlen(responseText6));
-    _cdcService->Flush();
     loopTime = _variableMap->GenerateValue(250);
   }
   void Loop() 
@@ -208,6 +202,8 @@ extern "C"
     loopTime->Set((float)(now-prev) / _embeddedIOServiceCollection.TimerService->GetTicksPerSecond());
     prev = now;
     _cdcService->Flush();
-    _engineMain->Loop();
+
+    if(_engineMain != 0)
+      _engineMain->Loop();
   }
 }
