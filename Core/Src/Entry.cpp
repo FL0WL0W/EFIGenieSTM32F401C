@@ -68,7 +68,7 @@ extern "C"
 		size_t _configSize = 0;
     _engineMain = new EFIGenieMain(reinterpret_cast<void*>(&_config), _configSize, &_embeddedIOServiceCollection, _variableMap);
 
-    _metadata = Config::OffsetConfig(&_config, _configSize);
+    _metadata = Config::OffsetConfig(&_config, *reinterpret_cast<const uint32_t *>(&_config) + 8);
     _getVariableHandler = new CommunicationHandler_GetVariable(_variableMap);
     _prefixHandler->RegisterHandler(_getVariableHandler, "g", 1);
     _prefixHandler->RegisterReceiveCallBack(new communication_receive_callback_t([](communication_send_callback_t send, void *data, size_t length)
@@ -152,7 +152,7 @@ extern "C"
       {
         size_t configSize = 0;
         _engineMain = new EFIGenieMain(&_config, configSize, &_embeddedIOServiceCollection, _variableMap);
-        _metadata = Config::OffsetConfig(&_config, configSize);
+        _metadata = Config::OffsetConfig(&_config, *reinterpret_cast<const uint32_t *>(&_config) + 8);
 
         _engineMain->Setup();
       }
