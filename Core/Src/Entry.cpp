@@ -24,6 +24,8 @@ extern char _config;
 
 extern "C"
 {
+  const char ack[1] = {6};
+  const char nack[1] = {21};
   GeneratorMap<Variable> *_variableMap;
   uint8_t VariableBuff[9];
   uint32_t Commands[32];
@@ -130,7 +132,6 @@ extern "C"
         HAL_FLASHEx_OBProgram(&pOBInit);
       }
 
-      char ack[1] = {6};
       send(ack, sizeof(ack));
 
       return minDataSize + writeDataLength;
@@ -139,17 +140,10 @@ extern "C"
     { 
       if(_engineMain != 0)
       {
-        const char responseText[19] = "Quiting EngineMain";
-        send((uint8_t*)responseText, strlen(responseText));
         delete _engineMain;
         _engineMain = 0;
-        send((uint8_t*)doneResponseText, strlen(doneResponseText));
       }
-      else
-      {
-        const char responseText[25] = "EngineMain not running\n\r";
-        send((uint8_t*)responseText, strlen(responseText));
-      }
+      send(ack, sizeof(ack));
       return static_cast<size_t>(0);
     }), "q", 1, false);
     _prefixHandler->RegisterReceiveCallBack(new communication_receive_callback_t([](communication_send_callback_t send, void *data, size_t length)
@@ -157,22 +151,12 @@ extern "C"
       if(_engineMain == 0)
       {
         size_t configSize = 0;
-        const char responseText1[24] = "Initializing EngineMain";
-        send((uint8_t*)responseText1, strlen(responseText1));
         _engineMain = new EFIGenieMain(&_config, configSize, &_embeddedIOServiceCollection, _variableMap);
         _metadata = Config::OffsetConfig(&_config, configSize);
-        send((uint8_t*)doneResponseText, strlen(doneResponseText));
 
-        const char responseText2[22] = "Setting Up EngineMain";
-        send((uint8_t*)responseText2, strlen(responseText2));
         _engineMain->Setup();
-        send((uint8_t*)doneResponseText, strlen(doneResponseText));
       }
-      else
-      {
-        const char responseText[29] = "EngineMain already started\n\r";
-        send((uint8_t*)responseText, strlen(responseText));
-      }
+      send(ack, sizeof(ack));
       return static_cast<size_t>(0);
     }), "s", 1, false);
     _prefixHandler->RegisterReceiveCallBack(new communication_receive_callback_t([](communication_send_callback_t send, void *data, size_t length)
