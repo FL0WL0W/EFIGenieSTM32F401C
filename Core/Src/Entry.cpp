@@ -130,6 +130,7 @@ extern "C"
         }
         pOBInit.WRPState = OB_WRPSTATE_ENABLE;
         HAL_FLASHEx_OBProgram(&pOBInit);
+        HAL_FLASH_Lock();
       }
 
       send(ack, sizeof(ack));
