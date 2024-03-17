@@ -59,7 +59,7 @@ extern "C"
     _variableMap = new GeneratorMap<Variable>();
     _cdcService = new STM32HalCommunicationService_CDC();
     _prefixHandler = new CommunicationHandler_Prefix();
-    _cdcService->RegisterReceiveCallBack([](communication_send_callback_t send, void *data, size_t length){ return _prefixHandler->Receive(send, data, length);});
+    _cdcService->RegisterReceiveCallBack([](communication_send_callback_t send, const void *data, size_t length){ return _prefixHandler->Receive(send, data, length);});
 
     _embeddedIOServiceCollection.DigitalService = new Stm32HalDigitalService();
     _embeddedIOServiceCollection.AnalogService = new Stm32HalAnalogService();
@@ -71,28 +71,28 @@ extern "C"
 
     _metadata = Config::OffsetConfig(&_config, *reinterpret_cast<const uint32_t *>(&_config) + 8);
     _getVariableHandler = new CommunicationHandler_GetVariable(_variableMap);
-    _prefixHandler->RegisterReceiveCallBack([](communication_send_callback_t send, void *data, size_t length){ return _getVariableHandler->Receive(send, data, length);}, "g", 1);
-    _prefixHandler->RegisterReceiveCallBack([](communication_send_callback_t send, void *data, size_t length)
+    _prefixHandler->RegisterReceiveCallBack([](communication_send_callback_t send, const void *data, size_t length){ return _getVariableHandler->Receive(send, data, length);}, "g", 1);
+    _prefixHandler->RegisterReceiveCallBack([](communication_send_callback_t send, const void *data, size_t length)
     { 
       const size_t minDataSize = sizeof(void *) + sizeof(size_t);
       if(length < minDataSize)
         return static_cast<size_t>(0);
 
-      void *readData = *reinterpret_cast<void **>(data);
-      size_t readDataLength = *reinterpret_cast<size_t *>(reinterpret_cast<uint8_t *>(data) + sizeof(void *));
+      const void *readData = *reinterpret_cast<void * const *>(data);
+      const size_t readDataLength = *reinterpret_cast<const size_t *>(reinterpret_cast<const uint8_t *>(data) + sizeof(void *));
       send(readData, readDataLength);
 
       return minDataSize;
     }, "r", 1);
-    _prefixHandler->RegisterReceiveCallBack([](communication_send_callback_t send, void *data, size_t length)
+    _prefixHandler->RegisterReceiveCallBack([](communication_send_callback_t send, const void *data, size_t length)
     { 
       const size_t minDataSize = sizeof(void *) + sizeof(size_t);
       if(length < minDataSize)
         return static_cast<size_t>(0);
 
-      void *writeDataDest = *reinterpret_cast<void **>(data);
-      size_t writeDataLength = *reinterpret_cast<size_t *>(reinterpret_cast<uint8_t *>(data) + sizeof(void *));
-      void *writeData = reinterpret_cast<void *>(reinterpret_cast<uint8_t *>(data) + sizeof(void *) + sizeof(size_t));
+      void *writeDataDest = *reinterpret_cast<void * const *>(data);
+      const size_t writeDataLength = *reinterpret_cast<const size_t *>(reinterpret_cast<const uint8_t *>(data) + sizeof(void *));
+      const void *writeData = reinterpret_cast<const void *>(reinterpret_cast<const uint8_t *>(data) + sizeof(void *) + sizeof(size_t));
 
       if(length < minDataSize + writeDataLength)
         return static_cast<size_t>(0);
@@ -126,7 +126,7 @@ extern "C"
         {
           uint32_t programType = FLASH_TYPEPROGRAM_BYTE;
           uint8_t data = 0;
-          std::memcpy(&data,  reinterpret_cast<void *>(reinterpret_cast<uint8_t *>(writeData) + i), sizeof(uint8_t));
+          std::memcpy(&data,  reinterpret_cast<const void *>(reinterpret_cast<const uint8_t *>(writeData) + i), sizeof(uint8_t));
           HAL_FLASH_Program(programType, reinterpret_cast<size_t>(writeDataDest) + i, data);
         }
         pOBInit.WRPState = OB_WRPSTATE_ENABLE;
@@ -138,7 +138,7 @@ extern "C"
 
       return minDataSize + writeDataLength;
     }, "w", 1);
-    _prefixHandler->RegisterReceiveCallBack([](communication_send_callback_t send, void *data, size_t length)
+    _prefixHandler->RegisterReceiveCallBack([](communication_send_callback_t send, const void *data, size_t length)
     { 
       if(_engineMain != 0)
       {
@@ -148,7 +148,7 @@ extern "C"
       send(ack, sizeof(ack));
       return static_cast<size_t>(0);
     }, "q", 1, false);
-    _prefixHandler->RegisterReceiveCallBack([](communication_send_callback_t send, void *data, size_t length)
+    _prefixHandler->RegisterReceiveCallBack([](communication_send_callback_t send, const void *data, size_t length)
     { 
       if(_engineMain == 0)
       {
@@ -161,17 +161,17 @@ extern "C"
       send(ack, sizeof(ack));
       return static_cast<size_t>(0);
     }, "s", 1, false);
-    _prefixHandler->RegisterReceiveCallBack([](communication_send_callback_t send, void *data, size_t length)
+    _prefixHandler->RegisterReceiveCallBack([](communication_send_callback_t send, const void *data, size_t length)
     { 
       if(length < sizeof(uint32_t))//make sure there are enough bytes to process a request
         return static_cast<size_t>(0);
-      uint8_t offset = *reinterpret_cast<uint32_t *>(data); //grab offset from data
+      const uint8_t offset = *reinterpret_cast<const uint32_t *>(data); //grab offset from data
 
       send(reinterpret_cast<const uint8_t *>(_metadata) + offset * 64, 64);
 
       return static_cast<size_t>(sizeof(uint32_t));//return number of bytes handled
     }, "m", 1);
-    _prefixHandler->RegisterReceiveCallBack([](communication_send_callback_t send, void *data, size_t length)
+    _prefixHandler->RegisterReceiveCallBack([](communication_send_callback_t send, const void *data, size_t length)
     { 
       size_t configLocation[1] = { reinterpret_cast<size_t>(&_config) };
       send(configLocation, sizeof(configLocation));
