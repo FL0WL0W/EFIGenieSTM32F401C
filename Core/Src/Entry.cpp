@@ -114,7 +114,7 @@ extern "C"
 
     _metadata = Config::OffsetConfig(&_config, *reinterpret_cast<const uint32_t *>(&_config) + 8);
 
-    _efigenieHandler = new CommunicationHandler_EFIGenie(_variableMap, write, quit, start, reinterpret_cast<void*>(&_config), _metadata);
+    _efigenieHandler = new CommunicationHandler_EFIGenie(_variableMap, write, quit, start, reinterpret_cast<const void*>(&_config));
     _cdcService->RegisterReceiveCallBack([](communication_send_callback_t send, const void *data, size_t length){ return _efigenieHandler->Receive(send, data, length);});
 
     _engineMain->Setup();
