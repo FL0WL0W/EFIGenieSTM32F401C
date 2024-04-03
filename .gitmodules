@@ -1,3 +1,6 @@
 [submodule "libs/EFIGenie"]
 	path = libs/EFIGenie
 	url = https://github.com/FL0WL0W/EFIGenie
+[submodule "libs/EmbeddedIOServices"]
+	path = libs/EmbeddedIOServices
+	url = https://github.com/FL0WL0W/EmbeddedIOServices
