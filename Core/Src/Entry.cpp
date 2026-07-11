@@ -1,10 +1,10 @@
 #include "usbd_cdc_if.h"
-#include "EmbeddedIOServiceCollection.h"
+#include "ServiceRegistry.h"
 #include "Stm32HalDigitalService.h"
 #include "Stm32HalTimerService.h"
 #include "Stm32HalAnalogService.h"
 #include "Stm32HalPwmService.h"
-#include "EFIGenieMain.h"
+#include "EngineMain.h"
 #include "Variable.h"
 #include "CallBack.h"
 #include "Config.h"
@@ -31,10 +31,14 @@ extern "C"
   const char doneResponseText[10] = " (Done)\n\r";
   const void *_metadata;
   bool secondCommand = false;
-  EmbeddedIOServiceCollection _embeddedIOServiceCollection;
+  ServiceRegistry _serviceRegistry;
+  IDigitalService *_digitalService;
+  IAnalogService *_analogService;
+  ITimerService *_timerService;
+  IPwmService *_pwmService;
   STM32HalCommunicationService_CDC *_cdcService;
   CommunicationHandler_EFIGenie *_efigenieHandler;
-  EFIGenieMain *_engineMain;
+  EngineMain *_engineMain;
   Variable *loopTime;
   uint32_t prev;
 
@@ -91,7 +95,7 @@ extern "C"
     if(_engineMain == 0)
     {
       size_t configSize = 0;
-      _engineMain = new EFIGenieMain(&_config, configSize, &_embeddedIOServiceCollection, _variableMap);
+      _engineMain = new EngineMain(&_config, configSize, &_serviceRegistry, _variableMap);
       _metadata = Config::OffsetConfig(&_config, *reinterpret_cast<const uint32_t *>(&_config) + 8);
 
       _engineMain->Setup();
@@ -104,13 +108,18 @@ extern "C"
     _variableMap = new GeneratorMap<Variable>();
     _cdcService = new STM32HalCommunicationService_CDC();
 
-    _embeddedIOServiceCollection.DigitalService = new Stm32HalDigitalService();
-    _embeddedIOServiceCollection.AnalogService = new Stm32HalAnalogService();
-    _embeddedIOServiceCollection.TimerService = new Stm32HalTimerService(TimerIndex::Index2);
-    _embeddedIOServiceCollection.PwmService = new Stm32HalPwmService();
+    _digitalService = new Stm32HalDigitalService();
+    _analogService = new Stm32HalAnalogService();
+    _timerService = new Stm32HalTimerService(TimerIndex::Index2);
+    _pwmService = new Stm32HalPwmService();
+
+    _serviceRegistry.Register<IDigitalService>(_digitalService);
+    _serviceRegistry.Register<IAnalogService>(_analogService);
+    _serviceRegistry.Register<ITimerService>(_timerService);
+    _serviceRegistry.Register<IPwmService>(_pwmService);
 
 		size_t _configSize = 0;
-    _engineMain = new EFIGenieMain(reinterpret_cast<void*>(&_config), _configSize, &_embeddedIOServiceCollection, _variableMap);
+    _engineMain = new EngineMain(reinterpret_cast<void*>(&_config), _configSize, &_serviceRegistry, _variableMap);
 
     _metadata = Config::OffsetConfig(&_config, *reinterpret_cast<const uint32_t *>(&_config) + 8);
 
@@ -122,8 +131,8 @@ extern "C"
   }
   void Loop() 
   {
-    const tick_t now = _embeddedIOServiceCollection.TimerService->GetTick();
-    *loopTime = (float)(now-prev) / _embeddedIOServiceCollection.TimerService->GetTicksPerSecond();
+    const tick_t now = _timerService->GetTick();
+    *loopTime = (float)(now-prev) / _timerService->GetTicksPerSecond();
     prev = now;
     _cdcService->Flush();
 

@@ -5,7 +5,7 @@
             "name": "STM32F401CCUx-Debug",
             "displayName": "STM32F401CCUx-Debug",
             "description": "STM32F401CCUx-Debug",
-            "generator": "Ninja",
+            "generator": "Unix Makefiles",
             "binaryDir": "${sourceDir}/build/STM32F401CCUx-Debug",
             "cacheVariables": {
                 "CMAKE_C_COMPILER": "arm-none-eabi-gcc",
@@ -23,7 +23,7 @@
             "name": "STM32F401CCUx-Release",
             "displayName": "STM32F401CCUx-Release",
             "description": "STM32F401CCUx-Release",
-            "generator": "Ninja",
+            "generator": "Unix Makefiles",
             "binaryDir": "${sourceDir}/build/STM32F401CCUx-Release",
             "cacheVariables": {
                 "CMAKE_C_COMPILER": "arm-none-eabi-gcc",

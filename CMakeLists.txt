@@ -1,8 +1,23 @@
-cmake_minimum_required ( VERSION 3.9 )
+ cmake_minimum_required(VERSION 4.0)
+
 set(CMAKE_TRY_COMPILE_TARGET_TYPE "STATIC_LIBRARY")
 project ( EFIGenieSTM32F401C C CXX ASM )
 
-set(LIBRARIES	libs)
+set(LIBRARIES_DIR	    ${CMAKE_SOURCE_DIR}/libs)
+set(EmbeddedIOServicesHardwareAbstraction_Path ${LIBRARIES_DIR}/EmbeddedIOServices/HardwareAbstractions/Stm32Hal)
+
+include(FetchContent)
+
+FetchContent_Declare(
+    EFIGenie
+    GIT_REPOSITORY https://github.com/FL0WL0W/EFIGenie
+    GIT_TAG        main
+    GIT_PROGRESS   TRUE
+    GIT_SHALLOW    TRUE
+    SOURCE_DIR  ${LIBRARIES_DIR}/EFIGenie
+)
+
+FetchContent_MakeAvailable(EFIGenie)
 
 include_directories(Core/Inc)
 include_directories(Drivers/CMSIS/Device/ST/STM32F4xx/Include)
@@ -13,7 +28,7 @@ include_directories(Middlewares/ST/STM32_USB_Device_Library/Class/CDC/Inc)
 include_directories(Middlewares/ST/STM32_USB_Device_Library/Core/Inc)
 include_directories(USB_DEVICE/App)
 include_directories(USB_DEVICE/Target)
-include_directories(${LIBRARIES}/EmbeddedIOServices/HardwareAbstractions/Stm32Hal/include)
+include_directories(${EmbeddedIOServicesHardwareAbstraction_Path}/include)
 
 file(GLOB_RECURSE USER_CSOURCES Core/Src/*.c)
 file(GLOB_RECURSE USER_CSOURCES_Templates Core/Src/*_template.c)
@@ -50,16 +65,15 @@ file(GLOB_RECURSE USB_APP_CSOURCES_Templates USB_DEVICE/App/*_template.c)
 IF(USB_APP_CSOURCES_Templates)
         list(REMOVE_ITEM USB_APP_CSOURCES ${USB_APP_CSOURCES_Templates})
 ENDIF()
-file(GLOB_RECURSE EmbeddedIOService_SOURCES ${LIBRARIES}/EmbeddedIOServices/HardwareAbstractions/Stm32Hal/src/*.cpp)
-file(GLOB_RECURSE EmbeddedIOService_SOURCES_Templates ${LIBRARIES}/EmbeddedIOServices/HardwareAbstractions/Stm32Hal/src/*_template.cpp)
+file(GLOB_RECURSE EmbeddedIOService_SOURCES ${EmbeddedIOServicesHardwareAbstraction_Path}/src/*.cpp)
+file(GLOB_RECURSE EmbeddedIOService_SOURCES_Templates ${EmbeddedIOServicesHardwareAbstraction_Path}/src/*_template.cpp)
 IF(EmbeddedIOService_SOURCES_Templates)
         list(REMOVE_ITEM EmbeddedIOService_SOURCES ${EmbeddedIOService_SOURCES_Templates})
 ENDIF()
 
-set(SOURCE_FILES ${USER_CSOURCES} ${USER_CXXSOURCES} ${HAL_SOURCES} ${USB_CDC_SOURCES} ${USB_CORE_SOURCES} ${USB_TARGET_CSOURCES} ${USB_APP_CSOURCES} ${EmbeddedIOService_SOURCES} startup_stm32f401xc.s STM32F401CCUx_FLASH.ld)
-add_executable(firmware.elf ${SOURCE_FILES})
+set(SRC_FILES ${USER_CSOURCES} ${USER_CXXSOURCES} ${HAL_SOURCES} ${USB_CDC_SOURCES} ${USB_CORE_SOURCES} ${USB_TARGET_CSOURCES} ${USB_APP_CSOURCES} ${EmbeddedIOService_SOURCES} startup_stm32f401xc.s STM32F401CCUx_FLASH.ld)
+add_executable(firmware.elf ${SRC_FILES})
 
-add_subdirectory (${LIBRARIES}/EFIGenie)
 target_link_libraries(firmware.elf EFIGenie)
 
 set(HEX_FILE ${PROJECT_SOURCE_DIR}/build/firmware.hex)
